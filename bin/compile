@@ -7,6 +7,32 @@ BUILD_DIR="$1"
 CACHE_DIR="$2"
 ENV_DIR="$3"
 STAGE="$(mktemp -d)"
+BP_DIR=`cd $(dirname $0); cd ..; pwd`
+
+# Switch to new Node auto build behavior ahead of release
+export NEW_BUILD_SCRIPT_BEHAVIOR=true
+
+# Use architecture of multi-buildpack to compose behavior.
+# https://github.com/heroku/heroku-buildpack-multi
+cp $BP_DIR/.buildpacks $BUILD_DIR/.buildpacks
+url=https://github.com/heroku/heroku-buildpack-multi.git
+branch=""
+dir=$(mktemp -t buildpackXXXXX)
+rm -rf $dir
+
+echo "=====> Downloading Buildpack: $url"
+
+if [[ "$url" =~ \.tgz$ ]] || [[ "$url" =~ \.tgz\? ]]; then
+  mkdir -p "$dir"
+  curl -s "$url" | tar xvz -C "$dir" >/dev/null 2>&1
+else
+  git clone $url $dir >/dev/null 2>&1
+fi
+cd $dir
+
+if [ "$branch" != "" ]; then
+  git checkout $branch >/dev/null 2>&1
+fi
 
 if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
     echo "APP_BASE was not set. Aborting" | indent
