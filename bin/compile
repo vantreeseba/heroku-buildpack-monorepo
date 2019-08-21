@@ -9,12 +9,20 @@ ENV_DIR="$3"
 STAGE="$(mktemp -d)"
 BP_DIR=`cd $(dirname $0); cd ..; pwd`
 
+if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
+    echo "APP_BASE was not set. Aborting" | indent
+    exit 1
+fi
+
+APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+
+
 # Switch to new Node auto build behavior ahead of release
 export NEW_BUILD_SCRIPT_BEHAVIOR=true
 
 # Use architecture of multi-buildpack to compose behavior.
 # https://github.com/heroku/heroku-buildpack-multi
-cp $BP_DIR/.buildpacks $BUILD_DIR/.buildpacks
+cp $BP_DIR/.buildpacks $APP_BASE/.buildpacks
 url=https://github.com/heroku/heroku-buildpack-multi.git
 branch=""
 dir=$(mktemp -t buildpackXXXXX)
@@ -33,15 +41,6 @@ cd $dir
 if [ "$branch" != "" ]; then
   git checkout $branch >/dev/null 2>&1
 fi
-
-if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
-    echo "APP_BASE was not set. Aborting" | indent
-    exit 1
-fi
-
-
-
-APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
 yarn bootstrap
 cd $APP_BASE && yarn build
