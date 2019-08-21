@@ -12,7 +12,13 @@ if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
     echo "APP_BASE was not set. Aborting" | indent
     exit 1
 fi
+
+
+
 APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+
+yarn bootstrap
+cd $APP_BASE && yarn build
 
 (
     mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
