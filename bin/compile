@@ -57,8 +57,7 @@ if [ "$branch" != "" ]; then
   git checkout $branch >/dev/null 2>&1
 fi
 
-yarn bootstrap
-cd $APP_BASE && yarn build
+
 
 (
     mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
